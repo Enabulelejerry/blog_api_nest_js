@@ -40,7 +40,7 @@ export class ArticleEntity {
   @Column()
   authorId: number;
 
-  @ManyToOne(() => UserEntity, (user) => user.articles)
+  @ManyToOne(() => UserEntity, (user) => user.articles, { eager: true })
   @JoinColumn({ name: 'authorId' })
   author: UserEntity;
   @BeforeUpdate()
