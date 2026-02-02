@@ -1,5 +1,8 @@
 import { ArticleEntity } from '../article.entity';
 
-export interface IArticleResponse {
-  article: ArticleEntity;
+export interface IArticlesResponse {
+  articles: ArticleEntity[];
+  articlesCount: number;
+  page: number;
+  limit: number;
 }

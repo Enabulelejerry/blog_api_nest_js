@@ -6,6 +6,8 @@ import {
   Get,
   Param,
   Post,
+  Put,
+  Query,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -15,7 +17,10 @@ import { User } from '@/user/decorator/user.decorator';
 import { ArticleService } from './article.service';
 import { UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { AuthGuard } from '@/user/guards/auth.guard';
-import { IArticleResponse } from './types/articlesResponse.interface';
+import { IArticleResponse } from './types/articleResponse.interface';
+
+import { UpdateArticleDto } from './dto/updateArticle.dto';
+import { IArticlesResponse } from './types/articlesResponse.interface';
 
 @Controller('articles')
 export class ArticleController {
@@ -49,5 +54,37 @@ export class ArticleController {
     @User('id') currentUserId: number,
   ) {
     return await this.articleService.deleteArticle(slug, currentUserId);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Put(':slug')
+  @UsePipes(new ValidationPipe())
+  @UseGuards(AuthGuard)
+  async updateArticle(
+    @Param('slug') slug: string,
+    @User('id') currentUserId: number,
+    @Body('article') updateUserDto: UpdateArticleDto,
+  ): Promise<IArticleResponse> {
+    const updatedArticle = await this.articleService.updateArticle(
+      slug,
+      currentUserId,
+      updateUserDto,
+    );
+
+    return this.articleService.generateArticleResponse(updatedArticle);
+  }
+
+  @Get()
+  async findAll(@Query() query: any): Promise<IArticlesResponse> {
+    return await this.articleService.findAll(query);
+  }
+
+  @Post(':slug/favorite')
+  @UseGuards(AuthGuard)
+  async addToFavoriteArticles(
+    @User('id') currentUserId: number,
+    @Param('slug') slug: string,
+  ): Promise<IArticleResponse> {
+    return await this.articleService.addToFavoriteArticle(currentUserId, slug);
   }
 }
